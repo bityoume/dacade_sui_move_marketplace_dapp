@@ -3,27 +3,37 @@ import { useWalletKit } from "@mysten/wallet-kit";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { toast } from "react-toastify";
 
-function ListItem({ widgetToList, price, packageId, marketplaceId, afterListing }) {
+function ListItem({
+  widgetToList,
+  price,
+  packageId,
+  marketplaceId,
+  afterListing,
+}) {
   const { signAndExecuteTransactionBlock } = useWalletKit();
 
   const listItem = async () => {
     try {
       const txb = new TransactionBlock();
-txb.moveCall({
-  target: `${packageId}::marketplace::list`,
-  typeArguments: [`${packageId}::widget::Widget`, "0x2::sui::SUI"],
-  arguments: [txb.object(marketplaceId), txb.object(widgetToList), txb.pure(price)],
-});
+      txb.moveCall({
+        target: `${packageId}::marketplace::list`,
+        typeArguments: [`${packageId}::widget::Widget`, "0x2::sui::SUI"],
+        arguments: [
+          txb.object(marketplaceId),
+          txb.object(widgetToList),
+          txb.pure(price),
+        ],
+      });
 
-// sign and execute transaction block with wallet
-const output = await signAndExecuteTransactionBlock({
-  transactionBlock: txb,
-  options: { showEffects: true },
-});
+      // sign and execute transaction block with wallet
+      const output = await signAndExecuteTransactionBlock({
+        transactionBlock: txb,
+        options: { showEffects: true },
+      });
 
-// iterate through to get ID of listing
-const createdObjects = output.effects.created;
-console.log("createdObjects:", createdObjects);
+      // iterate through to get ID of listing
+      const createdObjects = output.effects.created;
+      console.log("createdObjects:", createdObjects);
 
       if (afterListing) {
         await afterListing();

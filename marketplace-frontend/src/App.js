@@ -63,26 +63,28 @@ function App() {
   const getOwnedWidgets = async () => {
     try {
       const suiClient = new SuiClient({ url: getFullnodeUrl("devnet") });
-const objects = await suiClient.getOwnedObjects({ owner: accountAddress });
-const widgets = [];
+      const objects = await suiClient.getOwnedObjects({
+        owner: accountAddress,
+      });
+      const widgets = [];
 
-// iterate through all objects owned by address
-for (let i = 0; i < objects.data.length; i++) {
-  const currentObjectId = objects.data[i].data.objectId;
+      // iterate through all objects owned by address
+      for (let i = 0; i < objects.data.length; i++) {
+        const currentObjectId = objects.data[i].data.objectId;
 
-  // get object information
-  const objectInfo = await suiClient.getObject({
-    id: currentObjectId,
-    options: { showContent: true },
-  });
+        // get object information
+        const objectInfo = await suiClient.getObject({
+          id: currentObjectId,
+          options: { showContent: true },
+        });
 
-  if (objectInfo.data.content.type == `${packageId}::widget::Widget`) {
-    const widgetObjectId = objectInfo.data.content.fields.id.id;
-    console.log("widget spotted:", widgetObjectId);
-    widgets.push(widgetObjectId);
-  }
-}
-setOwnedWidgets(widgets);
+        if (objectInfo.data.content.type === `${packageId}::widget::Widget`) {
+          const widgetObjectId = objectInfo.data.content.fields.id.id;
+          console.log("widget spotted:", widgetObjectId);
+          widgets.push(widgetObjectId);
+        }
+      }
+      setOwnedWidgets(widgets);
 
       toast.success(`Successfully refreshed owned widgets!`, {
         position: toast.POSITION.TOP_LEFT,
@@ -111,40 +113,49 @@ setOwnedWidgets(widgets);
     try {
       const suiClient = new SuiClient({ url: getFullnodeUrl("devnet") });
 
-// get marketplace ID
-const marketplaceObject = await suiClient.getObject({
-  id: marketplaceId,
-  options: { showContent: true },
-});
-const marketplaceItemsId = marketplaceObject.data.content.fields.items.fields.id.id;
+      // get marketplace ID
+      const marketplaceObject = await suiClient.getObject({
+        id: marketplaceId,
+        options: { showContent: true },
+      });
+      const marketplaceItemsId =
+        marketplaceObject.data.content.fields.items.fields.id.id;
 
-// get marketplace items ID
-const marketplaceItems = await suiClient.getDynamicFields({ parentId: marketplaceItemsId });
+      // get marketplace items ID
+      const marketplaceItems = await suiClient.getDynamicFields({
+        parentId: marketplaceItemsId,
+      });
 
-const listingIds = [];
-// get listing IDs - loop through and save IDs
-for (let i = 0; i < marketplaceItems.data.length; i++) {
-  listingIds.push(marketplaceItems.data[i].objectId);
-}
+      const listingIds = [];
+      // get listing IDs - loop through and save IDs
+      for (let i = 0; i < marketplaceItems.data.length; i++) {
+        listingIds.push(marketplaceItems.data[i].objectId);
+      }
 
-const output = [];
-// iterate through all listings and populate output array
-for (let i = 0; i < listingIds.length; i++) {
-  const currentListing = [];
-  const listingObject = await suiClient.getObject({
-    id: listingIds[i],
-    options: { showContent: true },
-  });
+      const output = [];
+      // iterate through all listings and populate output array
+      for (let i = 0; i < listingIds.length; i++) {
+        const currentListing = [];
+        const listingObject = await suiClient.getObject({
+          id: listingIds[i],
+          options: { showContent: true },
+        });
 
-  // save relevant info into an array for displaying on frontend
-  currentListing.push(`listingId: ${listingIds[i]}`);
-  currentListing.push(`askPrice: ${listingObject.data.content.fields.value.fields.ask}`);
-  currentListing.push(`owner: ${listingObject.data.content.fields.value.fields.owner}`);
-  currentListing.push(`widget: ${listingObject.data.content.fields.name}`);
-  output.push(currentListing);
-}
+        // save relevant info into an array for displaying on frontend
+        currentListing.push(`listingId: ${listingIds[i]}`);
+        currentListing.push(
+          `askPrice: ${listingObject.data.content.fields.value.fields.ask}`
+        );
+        currentListing.push(
+          `owner: ${listingObject.data.content.fields.value.fields.owner}`
+        );
+        currentListing.push(
+          `widget: ${listingObject.data.content.fields.name}`
+        );
+        output.push(currentListing);
+      }
 
-setListingInfo(output);
+      setListingInfo(output);
 
       toast.success(`Successfully refreshed listings!`, {
         position: toast.POSITION.TOP_LEFT,
@@ -161,8 +172,18 @@ setListingInfo(output);
       <ToastContainer />
       {!idsEntered ? (
         <div className="centered">
-          <input type="text" value={packageId} onChange={handlePackageIdInput} placeholder="Enter PackageId" />
-          <input type="text" value={marketplaceId} onChange={handleMarketplaceIdInput} placeholder="Enter MarketplaceId" />
+          <input
+            type="text"
+            value={packageId}
+            onChange={handlePackageIdInput}
+            placeholder="Enter PackageId"
+          />
+          <input
+            type="text"
+            value={marketplaceId}
+            onChange={handleMarketplaceIdInput}
+            placeholder="Enter MarketplaceId"
+          />
           <button className="button" onClick={handleSubmit}>
             Submit
           </button>
@@ -170,16 +191,28 @@ setListingInfo(output);
       ) : (
         <div>
           <div class="header">
-            <div class="column header-left title">MarketplaceId: {marketplaceId}</div>
-            <div class="header-right"><ConnectButton /></div>
+            <div class="column header-left title">
+              MarketplaceId: {marketplaceId}
+            </div>
+            <div class="header-right">
+              <ConnectButton />
+            </div>
           </div>
           <div class="row" id="second-row">
             <div class="column">
-              <img src="marketplace-banner.png" alt="Banner" className="banner-image"></img>
+              <img
+                src="marketplace-banner.png"
+                alt="Banner"
+                className="banner-image"
+              ></img>
             </div>
             <div class="column">
               <div class="sub-row">
-                <MintNewWidget setAccountAddress={setAccountAddress} packageId={packageId} afterMintingWidget={afterMintingWidget} />
+                <MintNewWidget
+                  setAccountAddress={setAccountAddress}
+                  packageId={packageId}
+                  afterMintingWidget={afterMintingWidget}
+                />
               </div>
               <div class="sub-row">
                 <button className="button" onClick={getOwnedWidgets}>
@@ -200,10 +233,20 @@ setListingInfo(output);
                   </div>
                   <div class="column column2">
                     <div class="row row1">
-                      <input type="text" value={widgetToList} onChange={handleWidgetInput} placeholder="input widgetId" />
+                      <input
+                        type="text"
+                        value={widgetToList}
+                        onChange={handleWidgetInput}
+                        placeholder="input widgetId"
+                      />
                     </div>
                     <div class="row row2">
-                      <input type="number" value={price} onChange={handlePriceInput} placeholder="input price" />
+                      <input
+                        type="number"
+                        value={price}
+                        onChange={handlePriceInput}
+                        placeholder="input price"
+                      />
                     </div>
                   </div>
                 </div>
@@ -228,17 +271,30 @@ setListingInfo(output);
                   </div>
                   <div class="column column2">
                     <div class="row row1">
-                      <input type="text" value={itemToPurchase} onChange={handleItemToPurchaseInput} placeholder="input itemId" />
+                      <input
+                        type="text"
+                        value={itemToPurchase}
+                        onChange={handleItemToPurchaseInput}
+                        placeholder="input itemId"
+                      />
                     </div>
                     <div class="row row2">
-                      <input type="number" value={amountSent} onChange={handleAmountSentInput} placeholder="input amount" />
+                      <input
+                        type="number"
+                        value={amountSent}
+                        onChange={handleAmountSentInput}
+                        placeholder="input amount"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div class="sub-row">
-                <TakeProfits packageId={packageId} marketplaceId={marketplaceId} />
+                <TakeProfits
+                  packageId={packageId}
+                  marketplaceId={marketplaceId}
+                />
               </div>
             </div>
           </div>
